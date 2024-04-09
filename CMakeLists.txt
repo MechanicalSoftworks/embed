@@ -346,8 +346,9 @@ function(b_embed TARGET FILENAME)
 
     # Make the identifier
     string(REGEX REPLACE "[^a-zA-Z0-9_]" "_" IDENTIFIER "${FILENAME}") # Replace all invalid characters with underscores
+    string(REGEX REPLACE "[^a-zA-Z0-9_]" "_" CLEAN_TARGET "${TARGET}") # Replace all invalid characters with underscores
     string(TOLOWER "${IDENTIFIER}" IDENTIFIER) # Make the identifier all lowercase
-    set(IDENTIFIER "${TARGET}_${IDENTIFIER}")  # Add the target name to the front
+    set(IDENTIFIER "${CLEAN_TARGET}_${IDENTIFIER}")  # Add the target name to the front
     embed_validate_identifier("${IDENTIFIER}") # Validate the identifier against C variable naming rules
 
     # Set up paths
@@ -385,11 +386,11 @@ function(b_embed TARGET FILENAME)
     )
 
     # Add the generated files to the target
-    target_include_directories(${TARGET} PUBLIC ${EMBED_BINARY_DIR}/autogen/${TARGET}/include)
+    target_include_directories(${TARGET} PRIVATE ${EMBED_BINARY_DIR}/autogen/${TARGET}/include)
     target_sources(${TARGET} PRIVATE ${CPP_FILE} ${EMBED_BINARY_DIR}/embed_impl.cpp ${EMBED_HPP})
 
     if (MSVC)
-        target_sources(${TARGET} PUBLIC ${FULL_PATH} ${EMBED_HPP})
+        target_sources(${TARGET} PRIVATE ${FULL_PATH} ${EMBED_HPP})
         get_filename_component(PARENT_FOLDER "${FULL_PATH}" DIRECTORY)  # Get the resource file's parent directory
         source_group(TREE ${EMBED_BINARY_DIR}/autogen/${TARGET}/src PREFIX "autogen" FILES ${CPP_FILE})
         source_group(TREE ${EMBED_BINARY_DIR} PREFIX "autogen" FILES ${EMBED_BINARY_DIR}/embed_impl.cpp)
